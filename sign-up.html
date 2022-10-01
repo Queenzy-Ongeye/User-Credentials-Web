@@ -12,10 +12,13 @@
     <div class="login-box">
         <div class="lef">
             <h1>Sign up</h1>
-            <input type="text" id="userName" placeholder="username">
+            <input type="text" id="username" placeholder="username">
             <input type="text" id="email" placeholder="email" />
             <input type="password" id="password" name="password" placeholder="Password">
+            <input type="date" id="dateOfBirth">
+            <input type="text" id="idNumber" placeholder="ID Number">
             <input type="submit" id="saveData" name="signup" value="Remove">
+
         </div>
         <div class="right">
         </div>
@@ -24,7 +27,7 @@
 <script type="module">
     // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js";
+    import { getDatabase, set, ref } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js";
     import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
     // TODO: Add SDKs for Firebase products that you want to use
@@ -45,8 +48,39 @@
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    const databse = getDatabase(app);
+    const database = getDatabase(app);
     const auth = getAuth();
+
+    signUp.addEventListener('click', (e) => {
+
+        var email = document.getElementById('email').value;
+        var password = document.getElementById('password').value;
+        var username = document.getElementById('username').value;
+        var dateOfBirth = document.getElementById('dateOfBirth').value;
+        var idNumber = document.getElementById('idNumber').value;
+        
+        createUserWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                // Signed in 
+                const user = userCredential.user;
+
+                set(ref(database, 'users/' +user.uid), {
+                    username: username,
+                    email: email,
+                    dateOfBirth: dateOfBirth,
+                    idNumber: idNumber,
+                })
+                alert('User created');
+                // ...
+            })
+            .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+
+                alert('errorMessage');
+                // ..
+            });
+    })
 
 </script>
 
