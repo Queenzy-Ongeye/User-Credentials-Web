@@ -1,54 +1,53 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js";
-import { getDatabase, set, ref } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth.js";
+// connecting web3
+const Web3 = require('web3');
+const { ethers } = require('ethers')
+const web3 = new Web3('https://mainnet.infura.io/v3/4e507a8cdac3475888fe702503fba880');
 
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+web3.eth.sendTransaction({ from: '0x6663184b3521bF1896Ba6e1E776AB94c317204B6', value: 5000 });
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-    apiKey: "AIzaSyAZpKZNOXzI2GQdSCRFXwNKRHStJDBNFqc",
-    authDomain: "user-details-1a938.firebaseapp.com",
-    databaseURL: "https://user-details-1a938-default-rtdb.firebaseio.com",
-    projectId: "user-details-1a938",
-    storageBucket: "user-details-1a938.appspot.com",
-    messagingSenderId: "937883910095",
-    appId: "1:937883910095:web:cd187c937a4669088f9cba",
-    measurementId: "G-K608L4F2Q3"
-};
+const itx = new ethers.providers.InfuraProvider(
+    'mainnet', // or 'ropsten', 'rinkeby', 'kovan', 'goerli'
+    '4e507a8cdac3475888fe702503fba880'
+)
+const signer = new ethers.Wallet('4e507a8cdac3475888fe702503fba880', itx)
+async function getBalance() {
+    response = await itx.send('relay_getBalance', [signer.address])
+    console.log(`Your current ITX balance is ${response.balance}`)
+}
+async function callContract() {
+    const iface = new ethers.utils.Interface(['function echo(string message)'])
+    const data = iface.encodeFunctionData('echo', ['Hello world!'])
+    const tx = {
+        to: '0x6663184b3521bF1896Ba6e1E776AB94c317204B6',
+        data: data,
+        gas: '100000',
+        schedule: 'fast'
+    }
+    const signature = await signRequest(tx)
+    const relayTransactionHash = await itx.send('relay_sendTransaction', [tx, signature])
+    console.log(`ITX relay hash: ${relayTransactionHash}`)
+    return relayTransactionHash
+}
+const wait = (milliseconds) => {
+    return new Promise((resolve) => setTimeout(resolve, milliseconds))
+}
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
-const auth = getAuth();
+async function waitTransaction(relayTransactionHash) {
+    let mined = false
 
-sighUp.addEventListener('click', (e) => {
+    while (!mined) {
+        const statusResponse = await itx.send('relay_getTransactionStatus', [relayTransactionHash])
 
-    var email = document.getElementById('email').value;
-    var password = document.getElementById('password').value;
-    var username = document.getElementById('username').value;
-
-    createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-            // Signed in 
-            const user = userCredential.user;
-
-            set(ref(database, 'users/' + user.uid), {
-                username: username,
-                email: email
-            })
-
-            alert('user created!');
-            // ...
-        })
-        .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-
-            alert(errorMessage);
-            // ..
-        });
-
-});
+        if (statusResponse.broadcasts) {
+            for (let i = 0; i < statusResponse.broadcasts.length; i++) {
+                const bc = statusResponse.broadcasts[i]
+                const receipt = await itx.getTransactionReceipt(bc.ethTxHash)
+                if (receipt && receipt.confirmations && receipt.confirmations > 1) {
+                    mined = true
+                    return receipt
+                }
+            }
+        }
+        await wait(1000)
+    }
+}
