@@ -1,9 +1,6 @@
 // connecting web3
-const Web3 = require('web3');
+// const Web3 = require('web3');
 const { ethers } = require('ethers')
-const web3 = new Web3('https://mainnet.infura.io/v3/4e507a8cdac3475888fe702503fba880');
-
-web3.eth.sendTransaction({ from: '0x6663184b3521bF1896Ba6e1E776AB94c317204B6', value: 5000 });
 
 const itx = new ethers.providers.InfuraProvider(
     'mainnet', // or 'ropsten', 'rinkeby', 'kovan', 'goerli'

@@ -1,0 +1,19 @@
+{
+  "name": "kotani-assessment",
+  "version": "1.0.0",
+  "description": "Assessment",
+  "main": "credentials.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Queenzy-Ongeye/User-Credentials-Web.git"
+  },
+  "author": "Queen",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Queenzy-Ongeye/User-Credentials-Web/issues"
+  },
+  "homepage": "https://github.com/Queenzy-Ongeye/User-Credentials-Web#readme"
+}
