@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/Queenzy-Ongeye/User-Credentials-Web/issues"
   },
-  "homepage": "https://github.com/Queenzy-Ongeye/User-Credentials-Web#readme"
+  "homepage": "https://github.com/Queenzy-Ongeye/User-Credentials-Web#readme",
+  "dependencies": {
+    "chai": "^4.3.6"
+  }
 }
